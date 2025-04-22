@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import AuthStack from "./AuthStack";
 import MainStack from "./MainStack";
 import SplashScreen from "../screens/welcome/SplashScreen";
+import RootStack from "./RootStack";
 
 const Router = () => {
-  const [isLoading, setIsLoading] = useState(true); // Splash için
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Login durumu
+  const [isLoading, setIsLoading] = useState(false); // Splash için
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Login durumu
 
   useEffect(() => {
     // Splash süresi simülasyonu (2 saniye sonra geçiş)
@@ -20,7 +21,7 @@ const Router = () => {
     return <SplashScreen />;
   }
 
-  return isAuthenticated ? <MainStack /> : <AuthStack />;
+  return isAuthenticated ? <RootStack /> : <AuthStack />;
 };
 
 export default Router;

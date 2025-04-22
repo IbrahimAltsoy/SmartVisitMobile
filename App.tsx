@@ -6,9 +6,12 @@ import Router from "./src/nagivation/Router";
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Router />
-    </NavigationContainer>
+    <>
+      <StatusBar style="dark" />
+      <NavigationContainer>
+        <Router />
+      </NavigationContainer>
+    </>
   );
 }
 
