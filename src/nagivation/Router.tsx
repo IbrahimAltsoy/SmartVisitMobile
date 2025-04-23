@@ -6,7 +6,7 @@ import RootStack from "./RootStack";
 
 const Router = () => {
   const [isLoading, setIsLoading] = useState(false); // Splash için
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Login durumu
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Login durumu
 
   useEffect(() => {
     // Splash süresi simülasyonu (2 saniye sonra geçiş)
