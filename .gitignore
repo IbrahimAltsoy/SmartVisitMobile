@@ -35,3 +35,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 .qodo
+# API ayarlarını gizle
+src/utils/apiClient.ts
+src/utils/baseUrl.ts
