@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -11,9 +11,12 @@ import {
   Platform,
   Animated,
   Easing,
+  Alert,
 } from "react-native";
 import { styles } from "./Login.styles";
 import { Ionicons } from "@expo/vector-icons";
+import { LoginCommand } from "../../../types/auth/login/LoginCommand";
+import AuthContext from "../../../context/AuthContext";
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -21,6 +24,7 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [scaleValue] = useState(new Animated.Value(1));
+  const { login }: any = useContext(AuthContext);
 
   const handlePressIn = () => {
     Animated.spring(scaleValue, {
@@ -36,6 +40,21 @@ const LoginScreen = () => {
       tension: 40,
       useNativeDriver: true,
     }).start();
+  };
+  const handleLogin = async () => {
+    const loginData: LoginCommand = {
+      email: email,
+      password: password,
+    };
+    try {
+      const result = await login(loginData);
+      console.log("giriş yapıldı.");
+      // Burada örnek olarak ana sayfaya yönlendirme yapılabilir:
+      // navigation.navigate("Home");
+    } catch (error: any) {
+      console.error("Giriş başarısız:", error.message);
+      // Alert veya Toast gösterilebilir
+    }
   };
 
   return (
@@ -135,6 +154,7 @@ const LoginScreen = () => {
             style={styles.button}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
+            onPress={handleLogin}
             activeOpacity={0.8}
           >
             <LinearGradient

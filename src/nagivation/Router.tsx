@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import AuthStack from "./AuthStack";
-import MainStack from "./MainStack";
 import SplashScreen from "../screens/welcome/SplashScreen";
 import RootStack from "./RootStack";
+import AuthContext from "../context/AuthContext";
 
 const Router = () => {
+  const { isAuthenticated }: any = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false); // Splash için
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Login durumu
 
   useEffect(() => {
     // Splash süresi simülasyonu (2 saniye sonra geçiş)

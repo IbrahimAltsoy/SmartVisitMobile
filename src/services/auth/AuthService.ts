@@ -1,54 +1,35 @@
 // src/services/AuthService.ts
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LoggedResponse } from "../../types/auth/login/LoggedResponse";
+import { LoginCommand } from "../../types/auth/login/LoginCommand";
 import apiClient from "../../utils/apiClient";
 import * as SecureStore from "expo-secure-store";
 
-class AuthService {
-  private static ACCESS_TOKEN_KEY = "accessToken";
-
-  // Giriş işlemi
-  static async login(email: string, password: string) {
+const authService = {
+  login: async (data: LoginCommand): Promise<LoggedResponse> => {
     try {
-      const response = await apiClient.post("/auth/login", { email, password });
+      const response = await apiClient.post<LoggedResponse>(
+        "/auth/login",
+        data
+      );
 
-      const token = response.data.token;
-      if (token) {
-        await SecureStore.setItemAsync(this.ACCESS_TOKEN_KEY, token);
+      // Token'ı sakla
+      if (response.data && response.data.accessToken) {
+        await SecureStore.setItemAsync(
+          "accessToken",
+          response.data.accessToken.token
+        );
       }
-
+      //console.log(response.data.accessToken.token);
       return response.data;
     } catch (error: any) {
-      console.error("Login failed:", error?.response?.data || error.message);
-      throw error;
+      console.error("Login error:", error);
+      throw new Error(error?.response?.data?.message || "Giriş yapılamadı.");
     }
-  }
-
-  // Kayıt işlemi
-  static async register(payload: {
-    email: string;
-    password: string;
-    name: string;
-    phone: string;
-  }) {
-    try {
-      const response = await apiClient.post("/auth/register", payload);
-      return response.data;
-    } catch (error: any) {
-      console.error("Register failed:", error?.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  // Oturumu sonlandır
-  static async logout() {
-    await SecureStore.deleteItemAsync(this.ACCESS_TOKEN_KEY);
-    // istersen apiClient.post('/auth/logout') da çağırılabilir
-  }
-
-  // Tokenı manuel alman gerekirse
-  static async getToken(): Promise<string | null> {
-    return await SecureStore.getItemAsync(this.ACCESS_TOKEN_KEY);
-  }
-}
-
-export default AuthService;
+  },
+  logout: async () => {
+    await AsyncStorage.removeItem("accessToken");
+    console.log("Çıkış yapıldı");
+  },
+};
+export default authService;

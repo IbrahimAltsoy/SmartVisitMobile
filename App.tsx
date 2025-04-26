@@ -3,14 +3,17 @@ import { StyleSheet, Text, View } from 'react-native';
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import Router from "./src/nagivation/Router";
+import { AuthProvider } from "./src/context/AuthContext";
 
 export default function App() {
   return (
     <>
       <StatusBar style="dark" />
-      <NavigationContainer>
-        <Router />
-      </NavigationContainer>
+      <AuthProvider>
+        <NavigationContainer>
+          <Router />
+        </NavigationContainer>
+      </AuthProvider>
     </>
   );
 }
