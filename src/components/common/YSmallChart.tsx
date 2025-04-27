@@ -43,7 +43,7 @@ const YSmallChart: React.FC<YSmallChartProps> = ({
       <View style={style}>
         <PieChart
           data={data.map((d, index) => ({
-            name: d.label,
+            name: `${d.label} (${d.value})`,
             population: d.value,
             color: generateColor(index),
             legendFontColor: "#333",

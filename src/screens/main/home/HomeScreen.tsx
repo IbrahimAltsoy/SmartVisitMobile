@@ -1,55 +1,190 @@
-import { styles } from "./Home.styles";
-
 import React, { useEffect, useRef, useState } from "react";
-import {
-  ScrollView,
-  RefreshControl,
-  View,
-  Text,
-  Dimensions,
-  Animated,
-} from "react-native";
+import { View, Text, Animated, Dimensions } from "react-native";
+import { styles } from "./Home.styles";
+import CustomerList from "../../../components/customers/CustomerList";
 import YCard from "../../../components/common/YCard";
-import YListItem from "../../../components/common/YListItem";
-import YButton from "../../../components/common/YButton";
-import YLoader from "../../../components/common/YLoader";
 import YSmallChart from "../../../components/common/YSmallChart";
+import YLoader from "../../../components/common/YLoader";
+
 const COLORS = {
-  primary: "#6366F1", // Mor
-  secondary: "#3B82F6", // Mavi
-  success: "#10B981", // Yeşil
-  warning: "#F59E0B", // Sarı
-  danger: "#EF4444", // Kırmızı
-  background: "#F8FAFC", // Arkaplan
-  textPrimary: "#1E293B", // Başlık
-  textSecondary: "#64748B", // Alt metin
-  cardBackground: "#FFFFFF", // Kartlar
+  primary: "#6366F1",
+  secondary: "#3B82F6",
+  success: "#10B981",
+  warning: "#F59E0B",
+  danger: "#EF4444",
 };
+
+interface Customer {
+  id: number;
+  name: string;
+  time: string;
+  status: "Bekliyor" | "Teslim Edildi" | "İptal";
+  phoneNumber: string;
+  productImages?: string[];
+}
+
 const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [smsRemaining, setSmsRemaining] = useState(0);
-  const screenWidth = Dimensions.get("window").width;
-  const data = {
-    labels: ["Pzt", "Salı", "Çrş", "Prş", "Cuma", "Cts", "Pzr"],
-    datasets: [
-      {
-        data: [8, 5, 10, 4, 12, 6, 2],
-      },
-    ],
-  };
-
-  const chartConfig = {
-    backgroundGradientFrom: "#ffffff",
-    backgroundGradientTo: "#ffffff",
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(93, 95, 239, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(107, 114, 128, ${opacity})`,
-    barPercentage: 0.5,
-  };
   const animation = useRef(new Animated.Value(0)).current;
 
+  const stats = [
+    { id: 1, title: "Gelen", value: 27, color: COLORS.primary },
+    { id: 2, title: "Biten", value: 21, color: COLORS.success },
+    { id: 3, title: "Kalan", value: 6, color: COLORS.danger },
+  ];
+
+  const fetchHomeData = async () => {
+    setLoading(true);
+    try {
+      setCustomers([
+        {
+          id: 1,
+          name: "Ali Yıldız",
+          time: "09:00",
+          status: "Bekliyor",
+          phoneNumber: "+90 5375092791",
+          productImages: [
+            "https://randomuser.me/api/portraits/men/1.jpg",
+            "https://randomuser.me/api/portraits/men/2.jpg",
+            "https://randomuser.me/api/portraits/men/3.jpg",
+            "https://randomuser.me/api/portraits/men/4.jpg",
+            "https://randomuser.me/api/portraits/men/1.jpg",
+            "https://randomuser.me/api/portraits/men/1.jpg",
+          ],
+        },
+        {
+          id: 2,
+          name: "Ayşe Demir",
+          time: "09:30",
+          status: "Teslim Edildi",
+          phoneNumber: "+90 531 234 56 78",
+          productImages: [
+            "https://randomuser.me/api/portraits/women/1.jpg",
+            "https://randomuser.me/api/portraits/women/2.jpg",
+          ],
+        },
+        {
+          id: 3,
+          name: "Mehmet Can",
+          time: "10:00",
+          status: "Bekliyor",
+          phoneNumber: "+90 530 345 67 89",
+          productImages: [
+            "https://randomuser.me/api/portraits/men/3.jpg",
+            "https://randomuser.me/api/portraits/men/4.jpg",
+          ],
+        },
+        {
+          id: 4,
+          name: "Zeynep Aydın",
+          time: "10:30",
+          status: "İptal",
+          phoneNumber: "+90 539 456 78 90",
+          productImages: [
+            "https://randomuser.me/api/portraits/women/3.jpg",
+            "https://randomuser.me/api/portraits/women/4.jpg",
+          ],
+        },
+        {
+          id: 5,
+          name: "Burak Çelik",
+          time: "11:00",
+          status: "Bekliyor",
+          phoneNumber: "+90 538 567 89 01",
+          productImages: [
+            "https://randomuser.me/api/portraits/men/5.jpg",
+            "https://randomuser.me/api/portraits/men/6.jpg",
+          ],
+        },
+        {
+          id: 6,
+          name: "Fatma Karaca",
+          time: "11:30",
+          status: "Teslim Edildi",
+          phoneNumber: "+90 537 678 90 12",
+          productImages: [
+            "https://randomuser.me/api/portraits/women/5.jpg",
+            "https://randomuser.me/api/portraits/women/6.jpg",
+          ],
+        },
+        {
+          id: 7,
+          name: "Can Yılmaz",
+          time: "12:00",
+          status: "Bekliyor",
+          phoneNumber: "+90 536 789 01 23",
+          productImages: [
+            "https://randomuser.me/api/portraits/men/7.jpg",
+            "https://randomuser.me/api/portraits/men/8.jpg",
+          ],
+        },
+        {
+          id: 8,
+          name: "Elif Özkan",
+          time: "12:30",
+          status: "İptal",
+          phoneNumber: "+90 535 890 12 34",
+          productImages: [
+            "https://randomuser.me/api/portraits/women/7.jpg",
+            "https://randomuser.me/api/portraits/women/8.jpg",
+          ],
+        },
+        {
+          id: 9,
+          name: "Murat Aslan",
+          time: "13:00",
+          status: "Bekliyor",
+          phoneNumber: "+90 534 901 23 45",
+          productImages: [
+            "https://randomuser.me/api/portraits/men/9.jpg",
+            "https://randomuser.me/api/portraits/men/10.jpg",
+          ],
+        },
+        {
+          id: 10,
+          name: "Sevil Güneş",
+          time: "13:30",
+          status: "Teslim Edildi",
+          phoneNumber: "+90 535 012 34 56",
+          productImages: [
+            "https://randomuser.me/api/portraits/women/9.jpg",
+            "https://randomuser.me/api/portraits/women/10.jpg",
+          ],
+        },
+        {
+          id: 11,
+          name: "Emre Kılıç",
+          time: "14:00",
+          status: "Bekliyor",
+          phoneNumber: "+90 532 234 45 67",
+          productImages: [
+            "https://randomuser.me/api/portraits/men/11.jpg",
+            "https://randomuser.me/api/portraits/men/12.jpg",
+          ],
+        },
+        {
+          id: 12,
+          name: "Selin Tekin",
+          time: "14:30",
+          status: "İptal",
+          phoneNumber: "+90 531 345 56 78",
+          productImages: [
+            "https://randomuser.me/api/portraits/women/11.jpg",
+            "https://randomuser.me/api/portraits/women/12.jpg",
+          ],
+        },
+      ]);
+
+      setSmsRemaining(120);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
+    fetchHomeData();
     Animated.timing(animation, {
       toValue: 1,
       duration: 600,
@@ -60,66 +195,16 @@ const HomeScreen = () => {
   if (loading) {
     return <YLoader text="Veriler Yükleniyor..." />;
   }
-  interface Customer {
-    id: number;
-    name: string;
-    time: string;
-    status: "Bekliyor" | "Teslim Edildi" | "İptal";
-  }
-  const stats = [
-    { id: 1, title: "Gelen", value: 27, color: COLORS.primary },
-    { id: 2, title: "Biten", value: 21, color: COLORS.success },
-    { id: 3, title: "Kalan", value: 6, color: COLORS.danger },
-  ];
-  const fetchHomeData = async () => {
-    setLoading(true);
-    try {
-      // API'den müşteri ve SMS verilerini çek
-      // Şimdilik sahte veri koyalım
-      setCustomers([
-        { id: 1, name: "Ali Veli", time: "14:00", status: "Bekliyor" },
-        { id: 2, name: "Ayşe Yılmaz", time: "15:30", status: "Teslim Edildi" },
-        { id: 3, name: "Mehmet Can", time: "16:45", status: "İptal" },
-      ]);
-      setSmsRemaining(120);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchHomeData();
-  }, []);
-
-  if (loading) {
-    return <YLoader text="Veriler Yükleniyor..." />;
-  }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={loading} onRefresh={fetchHomeData} />
-      }
-    >
-      {/* Hoşgeldin Mesajı */}
+    <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.welcome}>Hoşgeldin ibo!</Text>
-        <Text style={styles.subtitle}>Bugün harika işler başaracaksın 🚀</Text>
+        <Text style={styles.welcome}>Güzel işler seni bekliyor!</Text>
+        <Text style={styles.subtitle}>Bereketli bir gün dileriz! 🌟</Text>
       </View>
 
       {/* Sayaç Kartları */}
-      {/* <View style={styles.cardsRow}>
-        <YCard title="Bugün Gelenler" subtitle="3" />
-        <YCard title="Kalan SMS" subtitle={smsRemaining.toString()} />
-      </View> */}
-      <Text style={styles.subtitle}>
-        {new Date().toLocaleDateString("tr-TR", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })}
-      </Text>
       <View style={styles.cardsRow}>
         {stats.map((stat) => (
           <YCard
@@ -132,13 +217,14 @@ const HomeScreen = () => {
               borderLeftWidth: 4,
               borderLeftColor: stat.color,
             }}
-            onPress={() => {}}
           />
         ))}
       </View>
 
-      {/* Günlük Grafik */}
-      {/* Grafik Kartı */}
+      {/* Müşteri Listesi */}
+      <CustomerList customers={customers} />
+
+      {/* Haftalık Grafik */}
       <Animated.View
         style={[
           styles.graphCard,
@@ -166,34 +252,12 @@ const HomeScreen = () => {
             { label: "Cts", value: 6 },
             { label: "Pazar", value: 2 },
           ]}
-          chartType="pie" // 👈 pie chart kullanıyoruz!
+          chartType="pie"
           height={220}
         />
       </Animated.View>
-
-      {/* Son Gelenler */}
-      <View style={styles.listContainer}>
-        {customers.map((customer) => (
-          <YListItem
-            key={customer.id}
-            title={customer.name}
-            subtitle={customer.time}
-            status={customer.status}
-          />
-        ))}
-      </View>
-
-      {/* Hızlı Aksiyonlar */}
-      <View style={styles.actions}>
-        <YButton
-          title="Müşteri Listesi"
-          onPress={() => {}}
-          style={{ backgroundColor: "grey" }}
-        />
-        <YButton title="Yeni SMS Gönder" onPress={() => {}} />
-        <YButton title="Raporları Gör" onPress={() => {}} />
-      </View>
-    </ScrollView>
+    </View>
   );
 };
+
 export default HomeScreen;

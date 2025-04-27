@@ -11,14 +11,16 @@ export const styles = StyleSheet.create({
   sectionTitle: {},
   graphCard: {},
   welcome: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#333",
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#6366F1",
+    textAlign: "center",
+    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
-    marginTop: 4,
+    color: "#000",
+    textAlign: "center",
   },
   cardsRow: {
     flexDirection: "row",
