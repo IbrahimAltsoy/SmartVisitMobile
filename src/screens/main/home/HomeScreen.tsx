@@ -5,6 +5,8 @@ import CustomerList from "../../../components/customers/CustomerList";
 import YCard from "../../../components/common/YCard";
 import YSmallChart from "../../../components/common/YSmallChart";
 import YLoader from "../../../components/common/YLoader";
+import { CustomerService } from "../../../services/customer/CustomerService";
+import { Customer } from "../../../types/customer/Customer";
 
 const COLORS = {
   primary: "#6366F1",
@@ -13,15 +15,6 @@ const COLORS = {
   warning: "#F59E0B",
   danger: "#EF4444",
 };
-
-interface Customer {
-  id: number;
-  name: string;
-  time: string;
-  status: "Bekliyor" | "Teslim Edildi" | "İptal";
-  phoneNumber: string;
-  productImages?: string[];
-}
 
 const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -35,161 +28,167 @@ const HomeScreen = () => {
     { id: 3, title: "Kalan", value: 6, color: COLORS.danger },
   ];
 
-  const fetchHomeData = async () => {
-    setLoading(true);
-    try {
-      setCustomers([
-        {
-          id: 1,
-          name: "Ali Yıldız",
-          time: "09:00",
-          status: "Bekliyor",
-          phoneNumber: "+90 5375092791",
-          productImages: [
-            "https://randomuser.me/api/portraits/men/1.jpg",
-            "https://randomuser.me/api/portraits/men/2.jpg",
-            "https://randomuser.me/api/portraits/men/3.jpg",
-            "https://randomuser.me/api/portraits/men/4.jpg",
-            "https://randomuser.me/api/portraits/men/1.jpg",
-            "https://randomuser.me/api/portraits/men/1.jpg",
-          ],
-        },
-        {
-          id: 2,
-          name: "Ayşe Demir",
-          time: "09:30",
-          status: "Teslim Edildi",
-          phoneNumber: "+90 531 234 56 78",
-          productImages: [
-            "https://randomuser.me/api/portraits/women/1.jpg",
-            "https://randomuser.me/api/portraits/women/2.jpg",
-          ],
-        },
-        {
-          id: 3,
-          name: "Mehmet Can",
-          time: "10:00",
-          status: "Bekliyor",
-          phoneNumber: "+90 530 345 67 89",
-          productImages: [
-            "https://randomuser.me/api/portraits/men/3.jpg",
-            "https://randomuser.me/api/portraits/men/4.jpg",
-          ],
-        },
-        {
-          id: 4,
-          name: "Zeynep Aydın",
-          time: "10:30",
-          status: "İptal",
-          phoneNumber: "+90 539 456 78 90",
-          productImages: [
-            "https://randomuser.me/api/portraits/women/3.jpg",
-            "https://randomuser.me/api/portraits/women/4.jpg",
-          ],
-        },
-        {
-          id: 5,
-          name: "Burak Çelik",
-          time: "11:00",
-          status: "Bekliyor",
-          phoneNumber: "+90 538 567 89 01",
-          productImages: [
-            "https://randomuser.me/api/portraits/men/5.jpg",
-            "https://randomuser.me/api/portraits/men/6.jpg",
-          ],
-        },
-        {
-          id: 6,
-          name: "Fatma Karaca",
-          time: "11:30",
-          status: "Teslim Edildi",
-          phoneNumber: "+90 537 678 90 12",
-          productImages: [
-            "https://randomuser.me/api/portraits/women/5.jpg",
-            "https://randomuser.me/api/portraits/women/6.jpg",
-          ],
-        },
-        {
-          id: 7,
-          name: "Can Yılmaz",
-          time: "12:00",
-          status: "Bekliyor",
-          phoneNumber: "+90 536 789 01 23",
-          productImages: [
-            "https://randomuser.me/api/portraits/men/7.jpg",
-            "https://randomuser.me/api/portraits/men/8.jpg",
-          ],
-        },
-        {
-          id: 8,
-          name: "Elif Özkan",
-          time: "12:30",
-          status: "İptal",
-          phoneNumber: "+90 535 890 12 34",
-          productImages: [
-            "https://randomuser.me/api/portraits/women/7.jpg",
-            "https://randomuser.me/api/portraits/women/8.jpg",
-          ],
-        },
-        {
-          id: 9,
-          name: "Murat Aslan",
-          time: "13:00",
-          status: "Bekliyor",
-          phoneNumber: "+90 534 901 23 45",
-          productImages: [
-            "https://randomuser.me/api/portraits/men/9.jpg",
-            "https://randomuser.me/api/portraits/men/10.jpg",
-          ],
-        },
-        {
-          id: 10,
-          name: "Sevil Güneş",
-          time: "13:30",
-          status: "Teslim Edildi",
-          phoneNumber: "+90 535 012 34 56",
-          productImages: [
-            "https://randomuser.me/api/portraits/women/9.jpg",
-            "https://randomuser.me/api/portraits/women/10.jpg",
-          ],
-        },
-        {
-          id: 11,
-          name: "Emre Kılıç",
-          time: "14:00",
-          status: "Bekliyor",
-          phoneNumber: "+90 532 234 45 67",
-          productImages: [
-            "https://randomuser.me/api/portraits/men/11.jpg",
-            "https://randomuser.me/api/portraits/men/12.jpg",
-          ],
-        },
-        {
-          id: 12,
-          name: "Selin Tekin",
-          time: "14:30",
-          status: "İptal",
-          phoneNumber: "+90 531 345 56 78",
-          productImages: [
-            "https://randomuser.me/api/portraits/women/11.jpg",
-            "https://randomuser.me/api/portraits/women/12.jpg",
-          ],
-        },
-      ]);
+  // const fetchHomeData = async () => {
+  //   setLoading(true);
+  //   try {
+  //     setCustomers([
+  //       {
+  //         id: 1,
+  //         name: "Ali Yıldız",
+  //         time: "09:00",
+  //         status: "Bekliyor",
+  //         phoneNumber: "+90 5375092791",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/men/1.jpg",
+  //           "https://randomuser.me/api/portraits/men/2.jpg",
+  //           "https://randomuser.me/api/portraits/men/3.jpg",
+  //           "https://randomuser.me/api/portraits/men/4.jpg",
+  //           "https://randomuser.me/api/portraits/men/1.jpg",
+  //           "https://randomuser.me/api/portraits/men/1.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 2,
+  //         name: "Ayşe Demir",
+  //         time: "09:30",
+  //         status: "Teslim Edildi",
+  //         phoneNumber: "+90 531 234 56 78",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/women/1.jpg",
+  //           "https://randomuser.me/api/portraits/women/2.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 3,
+  //         name: "Mehmet Can",
+  //         time: "10:00",
+  //         status: "Bekliyor",
+  //         phoneNumber: "+90 530 345 67 89",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/men/3.jpg",
+  //           "https://randomuser.me/api/portraits/men/4.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 4,
+  //         name: "Zeynep Aydın",
+  //         time: "10:30",
+  //         status: "İptal",
+  //         phoneNumber: "+90 539 456 78 90",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/women/3.jpg",
+  //           "https://randomuser.me/api/portraits/women/4.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 5,
+  //         name: "Burak Çelik",
+  //         time: "11:00",
+  //         status: "Bekliyor",
+  //         phoneNumber: "+90 538 567 89 01",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/men/5.jpg",
+  //           "https://randomuser.me/api/portraits/men/6.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 6,
+  //         name: "Fatma Karaca",
+  //         time: "11:30",
+  //         status: "Teslim Edildi",
+  //         phoneNumber: "+90 537 678 90 12",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/women/5.jpg",
+  //           "https://randomuser.me/api/portraits/women/6.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 7,
+  //         name: "Can Yılmaz",
+  //         time: "12:00",
+  //         status: "Bekliyor",
+  //         phoneNumber: "+90 536 789 01 23",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/men/7.jpg",
+  //           "https://randomuser.me/api/portraits/men/8.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 8,
+  //         name: "Elif Özkan",
+  //         time: "12:30",
+  //         status: "İptal",
+  //         phoneNumber: "+90 535 890 12 34",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/women/7.jpg",
+  //           "https://randomuser.me/api/portraits/women/8.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 9,
+  //         name: "Murat Aslan",
+  //         time: "13:00",
+  //         status: "Bekliyor",
+  //         phoneNumber: "+90 534 901 23 45",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/men/9.jpg",
+  //           "https://randomuser.me/api/portraits/men/10.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 10,
+  //         name: "Sevil Güneş",
+  //         time: "13:30",
+  //         status: "Teslim Edildi",
+  //         phoneNumber: "+90 535 012 34 56",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/women/9.jpg",
+  //           "https://randomuser.me/api/portraits/women/10.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 11,
+  //         name: "Emre Kılıç",
+  //         time: "14:00",
+  //         status: "Bekliyor",
+  //         phoneNumber: "+90 532 234 45 67",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/men/11.jpg",
+  //           "https://randomuser.me/api/portraits/men/12.jpg",
+  //         ],
+  //       },
+  //       {
+  //         id: 12,
+  //         name: "Selin Tekin",
+  //         time: "14:30",
+  //         status: "İptal",
+  //         phoneNumber: "+90 531 345 56 78",
+  //         productImages: [
+  //           "https://randomuser.me/api/portraits/women/11.jpg",
+  //           "https://randomuser.me/api/portraits/women/12.jpg",
+  //         ],
+  //       },
+  //     ]);
 
-      setSmsRemaining(120);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setSmsRemaining(120);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
-    fetchHomeData();
-    Animated.timing(animation, {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
+    const fetchCustomers = async () => {
+      try {
+        const data = await CustomerService.getAll(1, 0, 12);
+        setCustomers(data.items);
+      } catch (error) {
+        console.error("Müşteri verisi alınırken hata:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomers();
   }, []);
 
   if (loading) {
@@ -222,7 +221,7 @@ const HomeScreen = () => {
       </View>
 
       {/* Müşteri Listesi */}
-      <CustomerList customers={customers} />
+      <CustomerList customers={customers!} />
 
       {/* Haftalık Grafik */}
       <Animated.View

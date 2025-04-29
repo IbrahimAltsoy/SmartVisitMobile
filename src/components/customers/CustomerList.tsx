@@ -8,15 +8,8 @@ import {
   Dimensions,
 } from "react-native";
 import CustomerCard from "./CustomerCard";
-
-interface Customer {
-  id: number;
-  name: string;
-  time: string;
-  status: "Bekliyor" | "Teslim Edildi" | "İptal";
-  phoneNumber: string;
-  productImages?: string[];
-}
+import CustomerDetailCard from "./CustomerDetailCard";
+import { Customer } from "../../types/customer/Customer"; // Doğru tip olduğunu varsayıyoruz
 
 interface CustomerListProps {
   customers: Customer[];
@@ -27,6 +20,9 @@ const screenHeight = Dimensions.get("window").height;
 const CustomerList: React.FC<CustomerListProps> = ({ customers }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     setFilteredCustomers(customers);
@@ -39,8 +35,8 @@ const CustomerList: React.FC<CustomerListProps> = ({ customers }) => {
       const query = searchQuery.toLowerCase();
       const filtered = customers.filter(
         (customer) =>
-          customer.name.toLowerCase().includes(query) ||
-          customer.phoneNumber.toLowerCase().includes(query)
+          customer.nameSurname.toLowerCase().includes(query) ||
+          customer.phone.toLowerCase().includes(query)
       );
       setFilteredCustomers(filtered);
     }
@@ -52,6 +48,24 @@ const CustomerList: React.FC<CustomerListProps> = ({ customers }) => {
         <Text style={styles.emptyText}>Bugün gelen müşteri bulunamadı.</Text>
       </View>
     );
+  }
+
+  // Eğer detay görünümdeysek
+  if (selectedCustomerId !== null) {
+    const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
+    if (selectedCustomer) {
+      return (
+        <View style={styles.detailContainer}>
+          <CustomerDetailCard customer={selectedCustomer} />
+          <Text
+            style={styles.backButton}
+            onPress={() => setSelectedCustomerId(null)}
+          >
+            ← Geri Dön
+          </Text>
+        </View>
+      );
+    }
   }
 
   return (
@@ -71,12 +85,9 @@ const CustomerList: React.FC<CustomerListProps> = ({ customers }) => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item, index }) => (
           <CustomerCard
-            name={item.name}
-            time={item.time}
-            status={item.status}
-            phoneNumber={item.phoneNumber}
-            productImages={item.productImages}
+            customer={item}
             index={index}
+            onDetailPress={(id) => setSelectedCustomerId(id)}
           />
         )}
         showsVerticalScrollIndicator={true}
@@ -106,6 +117,16 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: "#64748B",
+  },
+  detailContainer: {
+    padding: 12,
+  },
+  backButton: {
+    textAlign: "center",
+    marginTop: 16,
+    fontSize: 16,
+    color: "#3B82F6",
+    fontWeight: "500",
   },
 });
 

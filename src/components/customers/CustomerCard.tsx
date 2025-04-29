@@ -14,14 +14,11 @@ import {
 } from "react-native";
 import Animated, { useSharedValue, withSpring } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
+import { Customer } from "../../types/customer/Customer";
 
 interface CustomerCardProps {
-  name: string;
-  time: string;
-  status: "Bekliyor" | "Teslim Edildi" | "İptal";
-  phoneNumber: string;
-  productImages?: string[];
-  onDetailPress?: () => void;
+  customer: Customer;
+  onDetailPress?: (id: string) => void;
   index: number;
 }
 
@@ -32,11 +29,7 @@ const statusColors = {
 };
 
 const CustomerCard: React.FC<CustomerCardProps> = ({
-  name,
-  time,
-  status,
-  phoneNumber,
-  productImages = [],
+  customer,
   onDetailPress,
   index,
 }) => {
@@ -45,7 +38,12 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
 
   const [modalVisible, setModalVisible] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
-
+  const statusText =
+    customer?.status === 0
+      ? "Bekliyor"
+      : customer?.status === 1
+      ? "Teslim Edildi"
+      : "İptal";
   return (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -61,36 +59,41 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           styles.card,
           {
             transform: [{ scale }],
-            borderLeftColor: statusColors[status],
+            borderLeftColor: statusColors[statusText],
             width: width - 32,
           },
         ]}
       >
         {/* Üst Bilgi */}
         <View style={styles.header}>
-          <Image
+          {/* <Image
             source={{ uri: `https://i.pravatar.cc/150?u=${phoneNumber}` }}
             style={styles.avatar}
-          />
+          /> */}
           <View style={styles.userInfo}>
             <Text style={styles.name}>
-              {index + 1}-{name}
+              {index + 1}-{customer.nameSurname}
             </Text>
-            <Text style={styles.phone}>{phoneNumber}</Text>
-            <Text style={styles.time}>{time}</Text>
+            <Text style={styles.phone}>{customer.description}</Text>
+            <Text style={styles.time}>
+              {new Date(customer.createdDate).toLocaleDateString("tr-TR")}
+            </Text>
           </View>
           <View
-            style={[styles.badge, { backgroundColor: statusColors[status] }]}
+            style={[
+              styles.badge,
+              { backgroundColor: statusColors[statusText] },
+            ]}
           >
             <View style={styles.badgeDot} />
-            <Text style={styles.badgeText}>{status}</Text>
+            <Text style={styles.badgeText}>{statusText}</Text>
           </View>
         </View>
 
         {/* Ürün Görselleri */}
-        {productImages.length > 0 && (
+        {customer.photoUrls.length > 0 && (
           <FlatList
-            data={productImages}
+            data={customer.photoUrls}
             horizontal
             scrollEnabled={true}
             showsHorizontalScrollIndicator={false}
@@ -120,8 +123,8 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
-              if (phoneNumber) {
-                Linking.openURL(`tel:${phoneNumber}`);
+              if (customer.phone) {
+                Linking.openURL(`tel:${customer.phone}`);
               } else {
                 alert("Telefon numarası bulunamadı.");
               }
@@ -134,7 +137,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
-              const phoneWithoutSpaces = phoneNumber.replace(/\s+/g, ""); // Boşlukları temizliyoruz
+              const phoneWithoutSpaces = customer.phone.replace(/\s+/g, ""); // Boşlukları temizliyoruz
               const message = "Merhaba,";
               Linking.openURL(
                 `https://wa.me/${phoneWithoutSpaces.replace(
@@ -148,7 +151,10 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
             <Text style={styles.actionText}>Mesaj</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton} onPress={onDetailPress}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => onDetailPress?.(customer.id)}
+          >
             <Ionicons name="document" size={18} color="#6366F1" />
             <Text style={styles.actionText}>Detay</Text>
           </TouchableOpacity>
@@ -162,7 +168,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           onRequestClose={() => setModalVisible(false)}
         >
           <FlatList
-            data={productImages}
+            data={customer.photoUrls}
             horizontal
             pagingEnabled
             initialScrollIndex={startIndex}

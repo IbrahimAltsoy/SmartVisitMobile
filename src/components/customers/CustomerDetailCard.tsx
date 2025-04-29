@@ -10,15 +10,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { Customer } from "../../types/customer/Customer";
 
 const { width } = Dimensions.get("window");
 
 interface CustomerDetailCardProps {
-  name: string;
-  phoneNumber: string;
-  time: string;
-  status: "Bekliyor" | "Teslim Edildi" | "İptal";
-  productImages?: string[];
+  customer: Customer;
 }
 
 const statusColors = {
@@ -28,12 +25,14 @@ const statusColors = {
 };
 
 const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({
-  name,
-  phoneNumber,
-  time,
-  status,
-  productImages = [],
+  customer,
 }) => {
+  const statusText =
+    customer?.status === 0
+      ? "Bekliyor"
+      : customer?.status === 1
+      ? "Teslim Edildi"
+      : "İptal";
   return (
     <View style={styles.cardContainer}>
       {/* Gradient Header */}
@@ -44,15 +43,15 @@ const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({
         style={styles.gradientHeader}
       >
         <View style={styles.profileSection}>
-          <Image
-            source={{ uri: `https://i.pravatar.cc/150?u=${phoneNumber}` }}
+          {/* <Image
+            source={{ uri: `https://i.pravatar.cc/150?u=${customer.phone}` }}
             style={styles.avatar}
-          />
+          /> */}
           <View style={styles.userInfo}>
-            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.name}>{customer.nameSurname}</Text>
             <View style={styles.contactInfo}>
               <Ionicons name="call" size={16} color="white" />
-              <Text style={styles.phone}>{phoneNumber}</Text>
+              <Text style={styles.phone}>{customer.description}</Text>
             </View>
           </View>
         </View>
@@ -61,23 +60,28 @@ const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({
       {/* Content Area */}
       <View style={styles.content}>
         {/* Status Badge */}
-        <View style={[styles.badge, { backgroundColor: statusColors[status] }]}>
-          <Text style={styles.badgeText}>{status}</Text>
+        <View
+          style={[styles.badge, { backgroundColor: statusColors[statusText] }]}
+        >
+          <Text style={styles.badgeText}>{statusText}</Text>
           <View style={styles.badgeDot} />
         </View>
 
         {/* Time Info */}
         <View style={styles.timeContainer}>
           <Ionicons name="time" size={18} color="#64748B" />
-          <Text style={styles.timeText}>{time}</Text>
+          <Text style={styles.timeText}>{customer.description}</Text>
+          <Text style={styles.timeText}>
+            {new Date(customer.createdDate).toLocaleDateString("tr-TR")}
+          </Text>
         </View>
 
         {/* Product Gallery */}
-        {productImages.length > 0 && (
+        {customer.photoUrls.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Ürün Görselleri</Text>
             <FlatList
-              data={productImages}
+              data={customer.photoUrls}
               horizontal
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item, index) => index.toString()}
