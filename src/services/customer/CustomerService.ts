@@ -38,4 +38,15 @@ export const CustomerService = {
   async delete(id: string): Promise<void> {
     await apiClient.delete(`${BASE_URL}/${id}`);
   },
+  getSummary: async (timePeriod = 3) => {
+    const response = await apiClient.get(`/customers/summary`, {
+      params: { timePeriod },
+    });
+
+    return {
+      Delivered: response.data.delivered ?? 0,
+      Waiting: response.data.waiting ?? 0,
+      Canceled: response.data.canceled ?? 0,
+    };
+  },
 };

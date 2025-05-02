@@ -5,6 +5,7 @@ import { CustomerService } from "../../../services/customer/CustomerService";
 import { Customer } from "../../../types/customer/Customer";
 import { CustomerStatus } from "../../../types/enum/CustomerStatus";
 import HomeHeader from "../../../components/home/HomeHeader";
+import YColumnChart from "../../../components/common/YColumnChart";
 
 const PAGE_SIZE = 5;
 const TIME_PERIOD = 3;
@@ -14,11 +15,12 @@ type FilterType = "all" | CustomerStatus;
 const HomeScreen = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+
   const [customerCounts, setCustomerCounts] = useState({
     byStatus: {
       [CustomerStatus.Delivered]: 0,
@@ -26,40 +28,30 @@ const HomeScreen = () => {
       [CustomerStatus.Canceled]: 0,
     },
   });
+
   const loadingRef = useRef(false);
 
-  // Müşteri sayılarını hesapla
-  const calculateCounts = useCallback((customers: Customer[]) => {
-    const counts = {
-      [CustomerStatus.Delivered]: 0,
-      [CustomerStatus.Waiting]: 0,
-      [CustomerStatus.Canceled]: 0,
-    };
-
-    customers.forEach((customer) => {
-      if (customer.status || 0 in counts) {
-        counts[customer.status as CustomerStatus]++;
-      }
-    });
-
-    setCustomerCounts({
-      byStatus: {
-        [CustomerStatus.Delivered]: counts[CustomerStatus.Delivered],
-        [CustomerStatus.Waiting]: counts[CustomerStatus.Waiting],
-        [CustomerStatus.Canceled]: counts[CustomerStatus.Canceled],
-      },
-    });
+  const applyFilter = useCallback((data: Customer[], filter: FilterType) => {
+    return filter === "all" ? data : data.filter((c) => c.status === filter);
   }, []);
 
-  // Filtreleme fonksiyonu
-  const applyFilter = useCallback(
-    (customers: Customer[], filter: FilterType) => {
-      return filter === "all"
-        ? customers
-        : customers.filter((customer) => customer.status === filter);
-    },
-    []
-  );
+  const fetchSummary = useCallback(async () => {
+    try {
+      const summary = await CustomerService.getSummary(TIME_PERIOD);
+
+      setCustomerCounts({
+        byStatus: {
+          [CustomerStatus.Delivered]: summary.Delivered ?? 0,
+          [CustomerStatus.Waiting]: summary.Waiting ?? 0,
+          [CustomerStatus.Canceled]: summary.Canceled ?? 0,
+        },
+      });
+    } catch (error) {
+      console.error("Özet verisi alınamadı:", error);
+    }
+  }, []);
+
+  // 📌 BURAYA KADAR
 
   const fetchCustomers = useCallback(
     async (pageNumber: number, isRefresh = false) => {
@@ -85,25 +77,21 @@ const HomeScreen = () => {
         }));
 
         setCustomers((prev) => {
-          const updatedCustomers = isRefresh
+          const updated = isRefresh
             ? newCustomers
             : [
                 ...prev,
                 ...newCustomers.filter((c) => !prev.some((p) => p.id === c.id)),
               ];
 
-          // Filtrelenmiş listeyi güncelle
-          setFilteredCustomers(applyFilter(updatedCustomers, activeFilter));
-          // Sayıları hesapla
-          calculateCounts(updatedCustomers);
-
-          return updatedCustomers;
+          setFilteredCustomers(applyFilter(updated, activeFilter));
+          return updated;
         });
 
         setHasMore(response.items.length === PAGE_SIZE);
         setPage(pageNumber + 1);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } catch (err) {
+        console.error("Veri alınamadı", err);
         setHasMore(false);
       } finally {
         loadingRef.current = false;
@@ -111,10 +99,18 @@ const HomeScreen = () => {
         setRefreshing(false);
       }
     },
-    [hasMore, activeFilter, applyFilter, calculateCounts]
+    [hasMore, activeFilter, applyFilter]
   );
+  const visitTrendData = [
+    { label: "Pzt", value: 10, color: "#6366F1" },
+    { label: "Sal", value: 14, color: "#10B981" },
+    { label: "Çar", value: 12, color: "#F59E0B" },
+    { label: "Per", value: 7, color: "#EF4444" },
+    { label: "Cum", value: 9, color: "#8B5CF6" },
+    { label: "Cts", value: 11, color: "#EC4899" },
+    { label: "Paz", value: 6, color: "#3B82F6" },
+  ];
 
-  // Filtre değiştiğinde
   const handleFilterChange = useCallback(
     (filter: FilterType) => {
       setActiveFilter(filter);
@@ -123,22 +119,24 @@ const HomeScreen = () => {
     [customers, applyFilter]
   );
 
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    setHasMore(true);
+    setPage(0);
+    fetchCustomers(0, true);
+    fetchSummary(); // 🔁 refresh sırasında sayıları da güncelle
+  }, [fetchCustomers, fetchSummary]);
+
   const handleLoadMore = useCallback(() => {
     if (!loadingRef.current && hasMore) {
       fetchCustomers(page);
     }
   }, [page, hasMore, fetchCustomers]);
 
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    setHasMore(true);
-    setPage(0);
-    fetchCustomers(0, true);
-  }, [fetchCustomers]);
-
   useEffect(() => {
-    fetchCustomers(0);
-  }, [fetchCustomers]);
+    fetchSummary(); // ✅ Sayılar burada yükleniyor
+    fetchCustomers(0); // Müşteriler burada geliyor
+  }, [fetchSummary, fetchCustomers]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -154,6 +152,12 @@ const HomeScreen = () => {
         hasMore={hasMore}
         onEndReached={handleLoadMore}
         onRefresh={handleRefresh}
+      />
+      <YColumnChart
+        data={visitTrendData}
+        height={150}
+        barColor="#000"
+        title="Günlük Gelen Müşteri Sayısı"
       />
     </View>
   );

@@ -75,9 +75,9 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
               {index + 1}-{customer.nameSurname}
             </Text>
             <Text style={styles.phone}>{customer.description}</Text>
-            <Text style={styles.time}>
+            {/* <Text style={styles.time}>
               {new Date(customer.createdDate).toLocaleDateString("tr-TR")}
-            </Text>
+            </Text> */}
           </View>
           <View
             style={[
@@ -201,16 +201,40 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     borderLeftWidth: 4,
-    padding: 16,
+    padding: 12, // ⬅ azaltıldı
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 8, // ⬅ azaltıldı
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 }, // ⬅ daha soft shadow
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
     alignSelf: "center",
   },
+
+  name: {
+    fontSize: 14, // ⬅ küçültüldü
+    fontWeight: "600",
+    color: "#1E293B",
+    marginBottom: 2,
+  },
+  phone: {
+    fontSize: 12, // ⬅ küçültüldü
+    color: "#64748B",
+    marginBottom: 2,
+  },
+  time: {
+    fontSize: 11, // ⬅ küçültüldü
+    color: "#94A3B8",
+  },
+
+  productImageHorizontal: {
+    width: 60, // ⬅ küçültüldü
+    height: 60, // ⬅ küçültüldü
+    borderRadius: 8,
+    backgroundColor: "#F1F5F9",
+  },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -227,21 +251,7 @@ const styles = StyleSheet.create({
   userInfo: {
     flex: 1,
   },
-  name: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1E293B",
-    marginBottom: 2,
-  },
-  phone: {
-    fontSize: 14,
-    color: "#64748B",
-    marginBottom: 2,
-  },
-  time: {
-    fontSize: 12,
-    color: "#94A3B8",
-  },
+
   badge: {
     flexDirection: "row",
     alignItems: "center",
@@ -270,12 +280,7 @@ const styles = StyleSheet.create({
   imageTouchable: {
     marginRight: 8,
   },
-  productImageHorizontal: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: "#F1F5F9",
-  },
+
   actionBar: {
     flexDirection: "row",
     justifyContent: "space-around",
