@@ -135,7 +135,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     fetchSummary(); // ✅ Sayılar burada yükleniyor
-    fetchCustomers(0); // Müşteriler burada geliyor
+    fetchCustomers(0); // Müşteriler burada geliyors
   }, [fetchSummary, fetchCustomers]);
 
   return (

@@ -4,7 +4,7 @@ import apiClient from "../../utils/apiClient";
 import { PagedResponse } from "../../types/common/PagedResponse";
 import { Customer } from "../../types/customer/Customer";
 
-const BASE_URL = "/customers/customers";
+const BASE_URL = "/customers/";
 
 export const CustomerService = {
   async getAll(
@@ -12,18 +12,23 @@ export const CustomerService = {
     page: number,
     pageSize: number
   ): Promise<PagedResponse<Customer>> {
-    const response = await apiClient.get<PagedResponse<Customer>>(BASE_URL, {
-      params: {
-        TimePeriod: timePeriod,
-        "PageRequest.Page": page,
-        "PageRequest.PageSize": pageSize,
-      },
-    });
+    const response = await apiClient.get<PagedResponse<Customer>>(
+      `${BASE_URL}${"customers"}`,
+      {
+        params: {
+          TimePeriod: timePeriod,
+          "PageRequest.Page": page,
+          "PageRequest.PageSize": pageSize,
+        },
+      }
+    );
     return response.data;
   },
 
   async getById(id: string): Promise<Customer> {
-    const response = await apiClient.get<Customer>(`${BASE_URL}/${id}`);
+    const response = await apiClient.get<Customer>(`${BASE_URL}${"customer"}`, {
+      params: { Id: id }, // dikkat: query string olarak gönderiliyor
+    });
     return response.data;
   },
 

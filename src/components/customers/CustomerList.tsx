@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useMemo, useState } from "react";
 import {
   FlatList,
   View,
@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import CustomerCard from "./CustomerCard";
-import CustomerDetailCard from "./CustomerDetailCard";
 import { Customer } from "../../types/customer/Customer";
 
 interface CustomerListProps {
@@ -32,9 +32,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
   initialLoad = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
-    null
-  );
+  const navigation = useNavigation<any>();
 
   const filteredCustomers = useMemo(() => {
     if (searchQuery.trim() === "") return customers;
@@ -47,17 +45,9 @@ const CustomerList: React.FC<CustomerListProps> = ({
     );
   }, [customers, searchQuery]);
 
-  const handleBack = useCallback(() => {
-    setSelectedCustomerId(null);
-  }, []);
-
-  const handleDetailPress = useCallback((id: string) => {
-    setSelectedCustomerId(id);
-  }, []);
-
-  const selectedCustomer = useMemo(() => {
-    return customers.find((c) => c.id === selectedCustomerId);
-  }, [customers, selectedCustomerId]);
+  const handleDetailPress = (id: string) => {
+    navigation.navigate("CustomerDetail", { id: id });
+  };
 
   if (initialLoad) {
     return (
@@ -71,17 +61,6 @@ const CustomerList: React.FC<CustomerListProps> = ({
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>Bugün gelen müşteri bulunamadı.</Text>
-      </View>
-    );
-  }
-
-  if (selectedCustomer) {
-    return (
-      <View style={styles.detailContainer}>
-        <CustomerDetailCard customer={selectedCustomer} />
-        <Text style={styles.backButton} onPress={handleBack}>
-          ← Geri Dön
-        </Text>
       </View>
     );
   }
@@ -162,17 +141,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: "#64748B",
-  },
-  detailContainer: {
-    flex: 1,
-    padding: 12,
-  },
-  backButton: {
-    textAlign: "center",
-    marginTop: 16,
-    fontSize: 16,
-    color: "#3B82F6",
-    fontWeight: "500",
   },
   footer: {
     alignItems: "center",

@@ -24,7 +24,7 @@ interface CustomerCardProps {
 
 const statusColors = {
   Bekliyor: "#F59E0B",
-  "Teslim Edildi": "#10B981",
+  "Teslim Edildi": "#047857",
   İptal: "#EF4444",
 };
 
@@ -44,6 +44,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
       : customer?.status === 1
       ? "Teslim Edildi"
       : "İptal";
+
   return (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -53,6 +54,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
       onPressOut={() => {
         scale.value = withSpring(1);
       }}
+      onPress={() => onDetailPress?.(customer.id)} // 👈 Tüm karta basınca da detay ekranına gitsin
     >
       <Animated.View
         style={[
@@ -64,20 +66,12 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           },
         ]}
       >
-        {/* Üst Bilgi */}
         <View style={styles.header}>
-          {/* <Image
-            source={{ uri: `https://i.pravatar.cc/150?u=${phoneNumber}` }}
-            style={styles.avatar}
-          /> */}
           <View style={styles.userInfo}>
-            <Text style={styles.name}>
+            <Text style={[styles.name, { color: statusColors[statusText] }]}>
               {index + 1}-{customer.nameSurname}
             </Text>
             <Text style={styles.phone}>{customer.description}</Text>
-            {/* <Text style={styles.time}>
-              {new Date(customer.createdDate).toLocaleDateString("tr-TR")}
-            </Text> */}
           </View>
           <View
             style={[
@@ -90,38 +84,12 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           </View>
         </View>
 
-        {/* Ürün Görselleri */}
-        {customer.photoUrls.length > 0 && (
-          <FlatList
-            data={customer.photoUrls}
-            horizontal
-            scrollEnabled={true}
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item, index: imgIndex }) => (
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={() => {
-                  setStartIndex(imgIndex);
-                  setModalVisible(true);
-                }}
-                style={styles.imageTouchable}
-              >
-                <Image
-                  source={{ uri: item }}
-                  style={styles.productImageHorizontal}
-                  resizeMode="cover"
-                />
-              </TouchableOpacity>
-            )}
-            contentContainerStyle={styles.imageRow}
-          />
-        )}
-
-        {/* Aksiyon Butonları */}
         <View style={styles.actionBar}>
           <TouchableOpacity
-            style={styles.actionButton}
+            style={[
+              styles.actionButton,
+              { borderColor: statusColors[statusText] },
+            ]}
             onPress={() => {
               if (customer.phone) {
                 Linking.openURL(`tel:${customer.phone}`);
@@ -137,13 +105,10 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
-              const phoneWithoutSpaces = customer.phone.replace(/\s+/g, ""); // Boşlukları temizliyoruz
+              const phone = customer.phone.replace(/\s+/g, "").replace("+", "");
               const message = "Merhaba,";
               Linking.openURL(
-                `https://wa.me/${phoneWithoutSpaces.replace(
-                  "+",
-                  ""
-                )}?text=${encodeURIComponent(message)}`
+                `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
               );
             }}
           >
@@ -160,10 +125,10 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           </TouchableOpacity>
         </View>
 
-        {/* Modal - Fotoğraf Galeri */}
+        {/* Modal Galeri (opsiyonel, açmak istersen yorumdan çıkarabilirim) */}
         <Modal
           visible={modalVisible}
-          transparent={true}
+          transparent
           animationType="fade"
           onRequestClose={() => setModalVisible(false)}
         >
@@ -172,12 +137,12 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
             horizontal
             pagingEnabled
             initialScrollIndex={startIndex}
-            getItemLayout={(data, index) => ({
+            getItemLayout={(_, index) => ({
               length: width,
               offset: width * index,
               index,
             })}
-            keyExtractor={(item, index) => index.toString()}
+            keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }) => (
               <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
                 <View style={styles.modalBackground}>
@@ -201,57 +166,20 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     borderLeftWidth: 4,
-    padding: 12, // ⬅ azaltıldı
+    padding: 8,
     borderRadius: 12,
-    marginBottom: 8, // ⬅ azaltıldı
+    marginBottom: 4,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 }, // ⬅ daha soft shadow
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 1,
     alignSelf: "center",
   },
-
-  name: {
-    fontSize: 14, // ⬅ küçültüldü
-    fontWeight: "600",
-    color: "#1E293B",
-    marginBottom: 2,
-  },
-  phone: {
-    fontSize: 12, // ⬅ küçültüldü
-    color: "#64748B",
-    marginBottom: 2,
-  },
-  time: {
-    fontSize: 11, // ⬅ küçültüldü
-    color: "#94A3B8",
-  },
-
-  productImageHorizontal: {
-    width: 60, // ⬅ küçültüldü
-    height: 60, // ⬅ küçültüldü
-    borderRadius: 8,
-    backgroundColor: "#F1F5F9",
-  },
-
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-    borderWidth: 2,
-    borderColor: "#E2E8F0",
-  },
-  userInfo: {
-    flex: 1,
-  },
-
+  name: { fontSize: 13, fontWeight: "600", marginBottom: 1 },
+  phone: { fontSize: 16, color: "#000", marginBottom: 1 },
+  header: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
+  userInfo: { flex: 1 },
   badge: {
     flexDirection: "row",
     alignItems: "center",
@@ -267,37 +195,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginRight: 6,
   },
-  badgeText: {
-    fontSize: 12,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  imageRow: {
-    paddingHorizontal: 12,
-    marginBottom: 12,
-    flexDirection: "row",
-  },
-  imageTouchable: {
-    marginRight: 8,
-  },
-
+  badgeText: { fontSize: 12, color: "#fff", fontWeight: "500" },
   actionBar: {
     flexDirection: "row",
     justifyContent: "space-around",
     borderTopWidth: 1,
     borderTopColor: "#F1F5F9",
-    paddingTop: 12,
-    marginTop: 8,
+    paddingTop: 6,
+    marginTop: 6,
   },
-  actionButton: {
-    alignItems: "center",
-    paddingHorizontal: 8,
-  },
-  actionText: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 4,
-  },
+  actionButton: { alignItems: "center", paddingHorizontal: 4 },
+  actionText: { fontSize: 11, color: "#64748B", marginTop: 2 },
   modalBackground: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.9)",
@@ -305,11 +213,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: Dimensions.get("window").width,
   },
-  modalImage: {
-    width: "90%",
-    height: "70%",
-    borderRadius: 12,
-  },
+  modalImage: { width: "90%", height: "70%", borderRadius: 12 },
 });
 
 export default CustomerCard;

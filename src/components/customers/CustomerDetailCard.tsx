@@ -33,9 +33,9 @@ const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({
       : customer?.status === 1
       ? "Teslim Edildi"
       : "İptal";
+
   return (
     <View style={styles.cardContainer}>
-      {/* Gradient Header */}
       <LinearGradient
         colors={["#6366F1", "#8B5CF6"]}
         start={[0, 0]}
@@ -49,17 +49,18 @@ const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({
           /> */}
           <View style={styles.userInfo}>
             <Text style={styles.name}>{customer.nameSurname}</Text>
-            <View style={styles.contactInfo}>
+            {/* <View style={styles.contactInfo}>
               <Ionicons name="call" size={16} color="white" />
-              <Text style={styles.phone}>{customer.description}</Text>
-            </View>
+              <Text style={styles.phone}>{customer.phone}</Text>
+            </View> {/* <View style={styles.contactInfo}>
+              <Ionicons name="call" size={16} color="white" />
+              <Text style={styles.phone}>{customer.phone}</Text>
+            </View> */}
           </View>
         </View>
       </LinearGradient>
 
-      {/* Content Area */}
       <View style={styles.content}>
-        {/* Status Badge */}
         <View
           style={[styles.badge, { backgroundColor: statusColors[statusText] }]}
         >
@@ -67,24 +68,28 @@ const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({
           <View style={styles.badgeDot} />
         </View>
 
-        {/* Time Info */}
         <View style={styles.timeContainer}>
-          <Ionicons name="time" size={18} color="#64748B" />
-          <Text style={styles.timeText}>{customer.description}</Text>
+          <Ionicons name="time" size={16} color="#94A3B8" />
           <Text style={styles.timeText}>
-            {new Date(customer.createdDate).toLocaleDateString("tr-TR")}
+            {new Date(customer.createdDate).toLocaleString("tr-TR")}
           </Text>
         </View>
+        {/* Ürün Açıklaması */}
+        {customer.description && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Ürün Açıklaması</Text>
+            <Text style={styles.descriptionText}>{customer.description}</Text>
+          </View>
+        )}
 
-        {/* Product Gallery */}
-        {customer.photoUrls.length > 0 && (
+        {Array.isArray(customer.photoUrls) && customer.photoUrls.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Ürün Görselleri</Text>
             <FlatList
               data={customer.photoUrls}
               horizontal
               showsHorizontalScrollIndicator={false}
-              keyExtractor={(item, index) => index.toString()}
+              keyExtractor={(_, index) => index.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity activeOpacity={0.8}>
                   <Image source={{ uri: item }} style={styles.productImage} />
@@ -96,10 +101,14 @@ const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({
           </>
         )}
 
-        {/* Action Buttons */}
         <View style={styles.actionButtons}>
+          <TouchableOpacity style={[styles.button, styles.callButton]}>
+            <Ionicons name="call-outline" size={18} color="white" />
+            <Text style={styles.buttonText}>Ara</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={[styles.button, styles.messageButton]}>
-            <Ionicons name="chatbubble" size={20} color="white" />
+            <Ionicons name="chatbubble-outline" size={18} color="white" />
             <Text style={styles.buttonText}>Mesaj</Text>
           </TouchableOpacity>
         </View>
@@ -128,29 +137,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  section: {
+    marginBottom: 20,
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: "#334155",
+    lineHeight: 20,
+    marginTop: 4,
+  },
+
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.3)",
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.5)",
   },
   userInfo: {
     marginLeft: 16,
     flex: 1,
   },
   name: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: "white",
-    marginBottom: 4,
+    marginBottom: 6,
   },
   contactInfo: {
     flexDirection: "row",
     alignItems: "center",
   },
   phone: {
-    fontSize: 16,
+    fontSize: 14,
     color: "rgba(255,255,255,0.9)",
     marginLeft: 8,
   },
@@ -191,15 +210,16 @@ const styles = StyleSheet.create({
   timeContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 24,
+    marginTop: 8,
+    marginBottom: 16,
   },
   timeText: {
     marginLeft: 8,
     color: "#64748B",
-    fontSize: 15,
+    fontSize: 14,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     color: "#1E293B",
     marginBottom: 12,
@@ -242,6 +262,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "600",
     marginLeft: 8,
+    fontSize: 14,
   },
 });
 

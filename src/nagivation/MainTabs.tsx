@@ -2,9 +2,8 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 
-import HomeScreen from "../screens/main/home/HomeScreen";
+import HomeStack from "./HomeStack"; // Home artık stack
 import CustomerScreen from "../screens/main/customer/CustomerScreen";
-import ScreenLayout from "../components/layout/ScreenLayout";
 import ProfileScreen from "../screens/main/profile/ProfileScreen";
 
 const Tab = createBottomTabNavigator();
@@ -20,18 +19,17 @@ const MainTabs = () => {
           let iconName;
 
           switch (route.name) {
-            case "Home":
+            case "HomeTab":
               iconName = "home-outline";
               break;
             case "Customer":
               iconName = "person-outline";
               break;
-            case "Reports":
-              iconName = "bar-chart-outline";
-              break;
             case "Profile":
               iconName = "settings-outline";
               break;
+            default:
+              iconName = "ellipse-outline";
           }
 
           return <Ionicons name={iconName as any} size={size} color={color} />;
@@ -39,28 +37,19 @@ const MainTabs = () => {
       })}
     >
       <Tab.Screen
-        name="Home"
-        children={() => (
-          <ScreenLayout>
-            <HomeScreen />
-          </ScreenLayout>
-        )}
+        name="HomeTab"
+        component={HomeStack}
+        options={{ title: "Ana Sayfa" }}
       />
       <Tab.Screen
         name="Customer"
-        children={() => (
-          <ScreenLayout>
-            <CustomerScreen />
-          </ScreenLayout>
-        )}
+        component={CustomerScreen}
+        options={{ title: "Müşteri" }}
       />
       <Tab.Screen
         name="Profile"
-        children={() => (
-          <ScreenLayout>
-            <ProfileScreen />
-          </ScreenLayout>
-        )}
+        component={ProfileScreen}
+        options={{ title: "Profil" }}
       />
     </Tab.Navigator>
   );
