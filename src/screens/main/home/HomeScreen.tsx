@@ -153,12 +153,12 @@ const HomeScreen = () => {
         onEndReached={handleLoadMore}
         onRefresh={handleRefresh}
       />
-      <YColumnChart
+      {/* <YColumnChart
         data={visitTrendData}
         height={150}
         barColor="#000"
         title="Günlük Gelen Müşteri Sayısı"
-      />
+      /> */}
     </View>
   );
 };

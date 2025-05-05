@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -35,26 +35,43 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
 }) => {
   const scale = useSharedValue(1);
   const { width } = useWindowDimensions();
-
   const [modalVisible, setModalVisible] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
-  const statusText =
-    customer?.status === 0
-      ? "Bekliyor"
-      : customer?.status === 1
-      ? "Teslim Edildi"
-      : "İptal";
+
+  const statusText = useMemo(() => {
+    switch (customer?.status) {
+      case 0:
+        return "Bekliyor";
+      case 1:
+        return "Teslim Edildi";
+      default:
+        return "İptal";
+    }
+  }, [customer?.status]);
+
+  const handleCall = () => {
+    if (customer.phone) Linking.openURL(`tel:${customer.phone}`);
+    else alert("Telefon numarası bulunamadı.");
+  };
+
+  const handleMessage = () => {
+    const phone = customer.phone.replace(/\s+/g, "").replace("+", "");
+    const message = "Merhaba,";
+    Linking.openURL(
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+    );
+  };
+
+  const handleDetail = () => {
+    onDetailPress?.(customer.id);
+  };
 
   return (
     <TouchableOpacity
       activeOpacity={0.9}
-      onPressIn={() => {
-        scale.value = withSpring(0.98);
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1);
-      }}
-      onPress={() => onDetailPress?.(customer.id)} // 👈 Tüm karta basınca da detay ekranına gitsin
+      onPressIn={() => (scale.value = withSpring(0.98))}
+      onPressOut={() => (scale.value = withSpring(1))}
+      onPress={handleDetail}
     >
       <Animated.View
         style={[
@@ -90,73 +107,58 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
               styles.actionButton,
               { borderColor: statusColors[statusText] },
             ]}
-            onPress={() => {
-              if (customer.phone) {
-                Linking.openURL(`tel:${customer.phone}`);
-              } else {
-                alert("Telefon numarası bulunamadı.");
-              }
-            }}
+            onPress={handleCall}
           >
             <Ionicons name="call" size={18} color="#3B82F6" />
             <Text style={styles.actionText}>Ara</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => {
-              const phone = customer.phone.replace(/\s+/g, "").replace("+", "");
-              const message = "Merhaba,";
-              Linking.openURL(
-                `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
-              );
-            }}
-          >
+          <TouchableOpacity style={styles.actionButton} onPress={handleMessage}>
             <Ionicons name="chatbubble" size={18} color="#10B981" />
             <Text style={styles.actionText}>Mesaj</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => onDetailPress?.(customer.id)}
-          >
+          <TouchableOpacity style={styles.actionButton} onPress={handleDetail}>
             <Ionicons name="document" size={18} color="#6366F1" />
             <Text style={styles.actionText}>Detay</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Modal Galeri (opsiyonel, açmak istersen yorumdan çıkarabilirim) */}
-        <Modal
-          visible={modalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <FlatList
-            data={customer.photoUrls}
-            horizontal
-            pagingEnabled
-            initialScrollIndex={startIndex}
-            getItemLayout={(_, index) => ({
-              length: width,
-              offset: width * index,
-              index,
-            })}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item }) => (
-              <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-                <View style={styles.modalBackground}>
-                  <Image
-                    source={{ uri: item }}
-                    style={styles.modalImage}
-                    resizeMode="contain"
-                  />
-                </View>
-              </TouchableWithoutFeedback>
-            )}
-            showsHorizontalScrollIndicator={false}
-          />
-        </Modal>
+        {modalVisible && (
+          <Modal
+            visible={modalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <FlatList
+              data={customer.photoUrls}
+              horizontal
+              pagingEnabled
+              initialScrollIndex={startIndex}
+              getItemLayout={(_, index) => ({
+                length: width,
+                offset: width * index,
+                index,
+              })}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={({ item }) => (
+                <TouchableWithoutFeedback
+                  onPress={() => setModalVisible(false)}
+                >
+                  <View style={styles.modalBackground}>
+                    <Image
+                      source={{ uri: item }}
+                      style={styles.modalImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                </TouchableWithoutFeedback>
+              )}
+              showsHorizontalScrollIndicator={false}
+            />
+          </Modal>
+        )}
       </Animated.View>
     </TouchableOpacity>
   );
@@ -216,4 +218,4 @@ const styles = StyleSheet.create({
   modalImage: { width: "90%", height: "70%", borderRadius: 12 },
 });
 
-export default CustomerCard;
+export default React.memo(CustomerCard);
