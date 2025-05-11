@@ -15,39 +15,49 @@ import {
 import Animated, { useSharedValue, withSpring } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { Customer } from "../../types/customer/Customer";
+import { CustomerStatus } from "../../types/enum/CustomerStatus";
 
 interface CustomerCardProps {
   customer: Customer;
   onDetailPress?: (id: string) => void;
+  onStatusPress?: (id: string) => void;
   index: number;
 }
 
-const statusColors = {
-  Bekliyor: "#F59E0B",
-  "Teslim Edildi": "#047857",
-  İptal: "#EF4444",
+const STATUS_COLORS: Record<CustomerStatus, string> = {
+  [CustomerStatus.Waiting]: "#F59E0B",
+  [CustomerStatus.Delivered]: "#047857",
+  [CustomerStatus.Canceled]: "#EF4444",
+};
+
+const STATUS_LABELS: Record<CustomerStatus, string> = {
+  [CustomerStatus.Waiting]: "Bekliyor",
+  [CustomerStatus.Delivered]: "Teslim Edildi",
+  [CustomerStatus.Canceled]: "İptal",
 };
 
 const CustomerCard: React.FC<CustomerCardProps> = ({
   customer,
   onDetailPress,
+  onStatusPress,
   index,
 }) => {
   const scale = useSharedValue(1);
   const { width } = useWindowDimensions();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [startIndex, setStartIndex] = useState(0);
-
   const statusText = useMemo(() => {
-    switch (customer?.status) {
-      case 0:
-        return "Bekliyor";
-      case 1:
-        return "Teslim Edildi";
-      default:
-        return "İptal";
-    }
-  }, [customer?.status]);
+    return STATUS_LABELS[customer.status as CustomerStatus];
+  }, [customer.status]);
+
+  const formattedDate = useMemo(() => {
+    const date = new Date(customer.createdDate);
+    const options: Intl.DateTimeFormatOptions = {
+      hour: "2-digit",
+      minute: "2-digit",
+      weekday: "long",
+    };
+    const formatted = date.toLocaleString("tr-TR", options);
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  }, [customer.createdDate]);
 
   const handleCall = () => {
     if (customer.phone) Linking.openURL(`tel:${customer.phone}`);
@@ -67,100 +77,74 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
   };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPressIn={() => (scale.value = withSpring(0.98))}
-      onPressOut={() => (scale.value = withSpring(1))}
-      onPress={handleDetail}
+    <Animated.View
+      style={[
+        styles.card,
+        {
+          transform: [{ scale }],
+          borderLeftColor: STATUS_COLORS[customer.status as CustomerStatus],
+          width: width - 32,
+        },
+      ]}
     >
-      <Animated.View
-        style={[
-          styles.card,
-          {
-            transform: [{ scale }],
-            borderLeftColor: statusColors[statusText],
-            width: width - 32,
-          },
-        ]}
-      >
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
-            <Text style={[styles.name, { color: statusColors[statusText] }]}>
-              {index + 1}-{customer.nameSurname}
+      <View style={styles.header}>
+        <View style={styles.userInfo}>
+          <View style={styles.rowBetween}>
+            <Text
+              style={[
+                styles.name,
+                { color: STATUS_COLORS[customer.status as CustomerStatus] },
+              ]}
+            >
+              {index + 1} - {customer.nameSurname}
             </Text>
-            <Text style={styles.phone}>{customer.description}</Text>
+            <Text style={styles.dateText}>{formattedDate}</Text>
           </View>
-          <View
-            style={[
-              styles.badge,
-              { backgroundColor: statusColors[statusText] },
-            ]}
-          >
-            <View style={styles.badgeDot} />
-            <Text style={styles.badgeText}>{statusText}</Text>
-          </View>
+          <Text style={styles.phone}>
+            {customer.description?.slice(0, 150)}
+          </Text>
         </View>
-
-        <View style={styles.actionBar}>
+        <View
+          style={[
+            styles.badge,
+            {
+              backgroundColor: STATUS_COLORS[customer.status as CustomerStatus],
+            },
+          ]}
+        >
+          <View style={styles.badgeDot} />
           <TouchableOpacity
-            style={[
-              styles.actionButton,
-              { borderColor: statusColors[statusText] },
-            ]}
-            onPress={handleCall}
+            activeOpacity={0.7}
+            onPress={() => onStatusPress?.(customer.id)}
           >
-            <Ionicons name="call" size={18} color="#3B82F6" />
-            <Text style={styles.actionText}>Ara</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton} onPress={handleMessage}>
-            <Ionicons name="chatbubble" size={18} color="#10B981" />
-            <Text style={styles.actionText}>Mesaj</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton} onPress={handleDetail}>
-            <Ionicons name="document" size={18} color="#6366F1" />
-            <Text style={styles.actionText}>Detay</Text>
+            <Text style={styles.badgeText}>{statusText}</Text>
           </TouchableOpacity>
         </View>
+      </View>
 
-        {modalVisible && (
-          <Modal
-            visible={modalVisible}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <FlatList
-              data={customer.photoUrls}
-              horizontal
-              pagingEnabled
-              initialScrollIndex={startIndex}
-              getItemLayout={(_, index) => ({
-                length: width,
-                offset: width * index,
-                index,
-              })}
-              keyExtractor={(_, index) => index.toString()}
-              renderItem={({ item }) => (
-                <TouchableWithoutFeedback
-                  onPress={() => setModalVisible(false)}
-                >
-                  <View style={styles.modalBackground}>
-                    <Image
-                      source={{ uri: item }}
-                      style={styles.modalImage}
-                      resizeMode="contain"
-                    />
-                  </View>
-                </TouchableWithoutFeedback>
-              )}
-              showsHorizontalScrollIndicator={false}
-            />
-          </Modal>
-        )}
-      </Animated.View>
-    </TouchableOpacity>
+      <View style={styles.actionBar}>
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            { borderColor: STATUS_COLORS[customer.status as CustomerStatus] },
+          ]}
+          onPress={handleCall}
+        >
+          <Ionicons name="call" size={18} color="#3B82F6" />
+          <Text style={styles.actionText}>Ara</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton} onPress={handleMessage}>
+          <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+          <Text style={styles.actionText}>WhatsApp</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton} onPress={handleDetail}>
+          <Ionicons name="document" size={18} color="#6366F1" />
+          <Text style={styles.actionText}>Detay</Text>
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
   );
 };
 
@@ -177,6 +161,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
     alignSelf: "center",
+  },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 4,
+  },
+  dateText: {
+    fontSize: 12,
+    color: "#111827",
+    fontWeight: "500",
   },
   name: { fontSize: 13, fontWeight: "600", marginBottom: 1 },
   phone: { fontSize: 16, color: "#000", marginBottom: 1 },

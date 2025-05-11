@@ -1,10 +1,18 @@
 import { StyleSheet } from "react-native";
 
+const primaryColor = "#6750A4"; // Daha modern bir mor tonu
+const secondaryColor = "#4A3F6B"; // Daha koyu bir varyant
+const backgroundColor = "#F3EDF7"; // Açık, yumuşak bir arka plan
+const cardBackgroundColor = "#FFFFFF";
+const textColorPrimary = "#212121"; // Koyu gri
+const textColorSecondary = "#757575"; // Açık gri
+const accentColor = "#00897B"; // Canlı bir vurgu rengi
+
 export const styles = StyleSheet.create({
   // Ana Container
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: backgroundColor,
   },
 
   // Header
@@ -12,52 +20,61 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 14,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    padding: 16,
+    backgroundColor: cardBackgroundColor,
+    borderBottomWidth: 0, // Kenarlık kaldırıldı
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2, // Android için gölge
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#111827",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: textColorPrimary,
   },
   searchButton: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: "#F3F4F6",
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: "#E0E0E0",
   },
 
   // Period Tabs
   periodContainer: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: "#fff",
+    width: "100%",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: cardBackgroundColor,
+    height: 60,
   },
   periodButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    marginRight: 8,
-    borderRadius: 20,
-    backgroundColor: "#E5E7EB",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginRight: 10,
+    borderRadius: 25,
+    backgroundColor: "#E0E0E0",
   },
   periodButtonActive: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: accentColor,
   },
   periodButtonText: {
-    fontSize: 13,
-    color: "#6B7280",
-    fontWeight: "500",
+    fontSize: 14,
+    color: "#000s",
+    fontWeight: "bold",
   },
   periodButtonTextActive: {
-    color: "#fff",
+    color: cardBackgroundColor,
   },
-  periodIndicator: {},
+  periodIndicator: {
+    // İstenirse aktif butonun altında küçük bir çizgi eklenebilir
+  },
 
   // Content
   content: {
-    padding: 12,
-    paddingBottom: 100,
+    padding: 16,
+    paddingBottom: 120,
   },
 
   // Stats Grid
@@ -65,111 +82,120 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   statCard: {
-    width: "20%",
-    alignItems: "center", // ikon ve metni ortalar
-    padding: 8,
-    marginBottom: 12,
-    borderRadius: 12,
-    backgroundColor: "#fff",
+    width: "48%", // Daha geniş kartlar
+    alignItems: "center",
+    padding: 16,
+    marginBottom: 16,
+    borderRadius: 10,
+    backgroundColor: cardBackgroundColor,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
 
   statIconContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 15,
-    backgroundColor: "#F3F4F6", // stat.color + "20" yapabilirsin istersen
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-
-  statNumber: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-    textAlign: "center",
-  },
-
-  statLabel: {
-    fontSize: 12,
-    color: "#374151", // soft koyu gri
-    textAlign: "center",
-    fontWeight: "500",
-  },
-  // Chart
-  chartContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 8,
-  },
-
-  // Actions
-  actionsContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  actionIcon: {
+    position: "absolute", // 🔑
+    top: 10,
+    left: 10,
     width: 32,
     height: 32,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
+    backgroundColor: "#F3F4F6", // veya stat.color + "20"
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+
+  statNumber: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: textColorPrimary,
+    textAlign: "center",
+  },
+
+  statLabel: {
+    fontSize: 13,
+    color: textColorSecondary,
+    textAlign: "center",
+    fontWeight: "medium",
+  },
+  // Chart
+  chartContainer: {
+    backgroundColor: cardBackgroundColor,
+    borderRadius: 15,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "semibold",
+    color: textColorPrimary,
+    marginBottom: 10,
+  },
+
+  // Actions
+  actionsContainer: {
+    backgroundColor: cardBackgroundColor,
+    borderRadius: 15,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  actionButtonLast: {
+    borderBottomWidth: 0, // Son butonun alt çizgisi yok
+  },
+  actionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
   actionText: {
     flex: 1,
-    fontSize: 14,
-    color: "#374151",
+    fontSize: 15,
+    color: textColorPrimary,
   },
 
   // FAB
   fab: {
     position: "absolute",
-    right: 20,
-    bottom: 20,
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: "#4F46E5",
+    right: 24,
+    bottom: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: primaryColor,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#4F46E5",
+    shadowColor: primaryColor,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
 });

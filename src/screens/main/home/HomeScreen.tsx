@@ -1,11 +1,18 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
-import { View } from "react-native";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
+import { Alert, Button, TouchableOpacity, View } from "react-native";
 import CustomerList from "../../../components/customers/CustomerList";
 import { CustomerService } from "../../../services/customer/CustomerService";
 import { Customer } from "../../../types/customer/Customer";
 import { CustomerStatus } from "../../../types/enum/CustomerStatus";
 import HomeHeader from "../../../components/home/HomeHeader";
-import YColumnChart from "../../../components/common/YColumnChart";
+import StatusUpdateModal from "../../../modals/customer/StatusUpdateModal";
+import YButton from "../../../components/common/YButton";
 
 const PAGE_SIZE = 5;
 const TIME_PERIOD = 3;
@@ -21,13 +28,10 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const [customerCounts, setCustomerCounts] = useState({
-    byStatus: {
-      [CustomerStatus.Delivered]: 0,
-      [CustomerStatus.Waiting]: 0,
-      [CustomerStatus.Canceled]: 0,
-    },
-  });
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    null
+  );
 
   const loadingRef = useRef(false);
 
@@ -38,7 +42,6 @@ const HomeScreen = () => {
   const fetchSummary = useCallback(async () => {
     try {
       const summary = await CustomerService.getSummary(TIME_PERIOD);
-
       setCustomerCounts({
         byStatus: {
           [CustomerStatus.Delivered]: summary.Delivered ?? 0,
@@ -51,7 +54,13 @@ const HomeScreen = () => {
     }
   }, []);
 
-  // 📌 BURAYA KADAR
+  const [customerCounts, setCustomerCounts] = useState({
+    byStatus: {
+      [CustomerStatus.Delivered]: 0,
+      [CustomerStatus.Waiting]: 0,
+      [CustomerStatus.Canceled]: 0,
+    },
+  });
 
   const fetchCustomers = useCallback(
     async (pageNumber: number, isRefresh = false) => {
@@ -83,7 +92,6 @@ const HomeScreen = () => {
                 ...prev,
                 ...newCustomers.filter((c) => !prev.some((p) => p.id === c.id)),
               ];
-
           setFilteredCustomers(applyFilter(updated, activeFilter));
           return updated;
         });
@@ -101,15 +109,6 @@ const HomeScreen = () => {
     },
     [hasMore, activeFilter, applyFilter]
   );
-  const visitTrendData = [
-    { label: "Pzt", value: 10, color: "#6366F1" },
-    { label: "Sal", value: 14, color: "#10B981" },
-    { label: "Çar", value: 12, color: "#F59E0B" },
-    { label: "Per", value: 7, color: "#EF4444" },
-    { label: "Cum", value: 9, color: "#8B5CF6" },
-    { label: "Cts", value: 11, color: "#EC4899" },
-    { label: "Paz", value: 6, color: "#3B82F6" },
-  ];
 
   const handleFilterChange = useCallback(
     (filter: FilterType) => {
@@ -124,7 +123,7 @@ const HomeScreen = () => {
     setHasMore(true);
     setPage(0);
     fetchCustomers(0, true);
-    fetchSummary(); // 🔁 refresh sırasında sayıları da güncelle
+    fetchSummary();
   }, [fetchCustomers, fetchSummary]);
 
   const handleLoadMore = useCallback(() => {
@@ -133,9 +132,30 @@ const HomeScreen = () => {
     }
   }, [page, hasMore, fetchCustomers]);
 
+  const handleStatusPress = useCallback((id: string) => {
+    setSelectedCustomerId(id);
+    setStatusModalVisible(true);
+  }, []);
+
+  const handleStatusUpdate = (newStatus: CustomerStatus) => {
+    console.log(
+      "Yeni durum güncellenecek:",
+      selectedCustomerId,
+      "→",
+      newStatus
+    );
+    // API gönderimi burada yapılabilir.
+    setStatusModalVisible(false);
+    setSelectedCustomerId(null);
+  };
+
+  const currentStatus = useMemo(() => {
+    return customers.find((c) => c.id === selectedCustomerId)?.status;
+  }, [selectedCustomerId, customers]);
+
   useEffect(() => {
-    fetchSummary(); // ✅ Sayılar burada yükleniyor
-    fetchCustomers(0); // Müşteriler burada geliyors
+    fetchSummary();
+    fetchCustomers(0);
   }, [fetchSummary, fetchCustomers]);
 
   return (
@@ -145,6 +165,7 @@ const HomeScreen = () => {
         counts={customerCounts}
         onSelect={handleFilterChange}
       />
+
       <CustomerList
         customers={filteredCustomers}
         loading={loading}
@@ -152,13 +173,16 @@ const HomeScreen = () => {
         hasMore={hasMore}
         onEndReached={handleLoadMore}
         onRefresh={handleRefresh}
+        onStatusPress={handleStatusPress}
       />
-      {/* <YColumnChart
-        data={visitTrendData}
-        height={150}
-        barColor="#000"
-        title="Günlük Gelen Müşteri Sayısı"
-      /> */}
+      <View>
+        <StatusUpdateModal
+          visible={statusModalVisible}
+          onClose={() => setStatusModalVisible(false)}
+          onStatusSelect={handleStatusUpdate}
+          currentStatus={currentStatus}
+        />
+      </View>
     </View>
   );
 };

@@ -20,6 +20,7 @@ interface CustomerListProps {
   onEndReached: () => void;
   onRefresh: () => void;
   initialLoad?: boolean;
+  onStatusPress?: (id: string) => void; // dışarıdan opsiyonel olarak gönderilebilir
 }
 
 const CustomerList: React.FC<CustomerListProps> = ({
@@ -30,12 +31,13 @@ const CustomerList: React.FC<CustomerListProps> = ({
   onEndReached,
   onRefresh,
   initialLoad = false,
+  onStatusPress,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigation = useNavigation<any>();
 
   const filteredCustomers = useMemo(() => {
-    if (searchQuery.trim() === "") return customers;
+    if (!searchQuery.trim()) return customers;
 
     const query = searchQuery.toLowerCase();
     return customers.filter(
@@ -46,7 +48,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
   }, [customers, searchQuery]);
 
   const handleDetailPress = (id: string) => {
-    navigation.navigate("CustomerDetail", { id: id });
+    navigation.navigate("CustomerDetail", { id });
   };
 
   if (initialLoad) {
@@ -57,7 +59,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
     );
   }
 
-  if (customers.length === 0 && !loading) {
+  if (!loading && filteredCustomers.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>Bugün gelen müşteri bulunamadı.</Text>
@@ -83,6 +85,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
             customer={item}
             index={index}
             onDetailPress={handleDetailPress}
+            onStatusPress={onStatusPress}
           />
         )}
         refreshControl={
@@ -93,11 +96,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
         ListFooterComponent={
           loading ? (
             <View style={styles.footer}>
-              <ActivityIndicator
-                size="small"
-                color="#3B82F6"
-                style={{ marginVertical: 16 }}
-              />
+              <ActivityIndicator size="small" color="#3B82F6" />
               <Text style={styles.footerText}>Veriler yükleniyor...</Text>
             </View>
           ) : !hasMore ? (

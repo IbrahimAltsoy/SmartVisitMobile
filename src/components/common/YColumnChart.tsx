@@ -58,7 +58,7 @@ const YColumnChart: React.FC<YColumnChartProps> = ({
           fontSize: 16,
           fontWeight: "600",
           marginBottom: 12,
-          color: "#F59E0B",
+          color: "#000",
         }}
       >
         {title}

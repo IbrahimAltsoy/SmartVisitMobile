@@ -18,48 +18,49 @@ const CustomerScreen = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("Haftalık");
 
   const stats = [
-    { label: "Toplam", value: 124, icon: "people", color: "#6366F1" },
-    { label: "Yeni", value: 37, icon: "person-add", color: "#10B981" },
-    { label: "Teslim", value: 60, icon: "checkmark-done", color: "#F59E0B" },
-    { label: "İptal", value: 6, icon: "close", color: "#EF4444" },
+    { label: "Toplam", value: 124, icon: "people", color: "#6750A4" },
+    { label: "Yeni", value: 37, icon: "person-add", color: "#4CAF50" },
+    { label: "Teslim", value: 60, icon: "checkmark-done", color: "#FFC107" },
+    { label: "İptal", value: 6, icon: "close", color: "#F44336" },
   ];
 
   const actions = [
     {
       label: "Müşteri Listesini Görüntüle",
       icon: "list",
-      color: "#3B82F6",
+      color: "#1976D2",
       handler: () => console.log("→ Listeleme ekranına git"),
     },
     {
       label: "Toplu SMS Gönder",
       icon: "chatbox-ellipses",
-      color: "#10B981",
+      color: "#388E3C",
       handler: () => console.log("→ Toplu SMS gönder ekranına git"),
     },
     {
       label: "Rapor Oluştur",
       icon: "document-text",
-      color: "#8B5CF6",
+      color: "#5E35B1",
       handler: () => console.log("→ Rapor oluştur ekranına git"),
     },
   ];
 
   const visitTrendData = [
-    { label: "Pzt", value: 10, color: "#6366F1" },
-    { label: "Sal", value: 14, color: "#10B981" },
-    { label: "Çar", value: 12, color: "#F59E0B" },
-    { label: "Per", value: 7, color: "#EF4444" },
-    { label: "Cum", value: 9, color: "#8B5CF6" },
-    { label: "Cts", value: 11, color: "#EC4899" },
-    { label: "Paz", value: 6, color: "#3B82F6" },
+    { label: "Pzt", value: 10, color: "#6750A4" },
+    { label: "Sal", value: 14, color: "#4CAF50" },
+    { label: "Çar", value: 12, color: "#FFC107" },
+    { label: "Per", value: 7, color: "#F44336" },
+    { label: "Cum", value: 9, color: "#5E35B1" },
+    { label: "Cts", value: 11, color: "#E91E63" },
+    { label: "Paz", value: 6, color: "#1976D2" },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Başlık ve Arama */}
+      {/* Başlık */}
       <View style={styles.header}>
         <Text style={styles.title}>Müşteri Yönetimi</Text>
+        {/* İstenirse buraya bir ikon eklenebilir */}
       </View>
 
       {/* Dönem Seçici */}
@@ -77,7 +78,14 @@ const CustomerScreen = () => {
             ]}
             onPress={() => setSelectedPeriod(option)}
           >
-            <Text style={styles.periodButtonText}>{option}</Text>
+            <Text
+              style={[
+                styles.periodButtonText,
+                selectedPeriod === option && styles.periodButtonTextActive,
+              ]}
+            >
+              {option}
+            </Text>
             {selectedPeriod === option && (
               <View style={styles.periodIndicator} />
             )}
@@ -85,23 +93,21 @@ const CustomerScreen = () => {
         ))}
       </ScrollView>
 
-      {/* İstatistik Kartları */}
+      {/* İçerik */}
       <ScrollView contentContainerStyle={styles.content}>
+        {/* İstatistik Kartları */}
         <View style={styles.statsGrid}>
-          {stats.map((stat, index) => (
-            <View
-              key={index}
-              style={[
-                styles.statCard,
-                { backgroundColor: `${stat.color}40` }, // %15 opacity
-              ]}
-            >
-              <View style={styles.statIconContainer}>
-                <Ionicons name="accessibility" size={18} color={stat.color} />
+          {stats.map((stat: any, index) => (
+            <View key={index} style={styles.statCard}>
+              <View
+                style={[
+                  styles.statIconContainer,
+                  { backgroundColor: `${stat.color}20` },
+                ]}
+              >
+                <Ionicons name={stat.icon} size={20} color={stat.color} />
               </View>
-              <Text style={[styles.statNumber, { color: stat.color }]}>
-                {stat.value}
-              </Text>
+              <Text style={styles.statNumber}>{stat.value}</Text>
               <Text style={styles.statLabel}>{stat.label}</Text>
             </View>
           ))}
@@ -109,33 +115,36 @@ const CustomerScreen = () => {
 
         {/* Grafik */}
         <View style={styles.chartContainer}>
-          <Text style={styles.sectionTitle}>Ziyaret Trendleri</Text>
-          <YColumnChart data={visitTrendData} height={200} barColor="#6366F1" />
+          <YColumnChart
+            data={visitTrendData}
+            height={180}
+            barColor={styles.header.backgroundColor}
+            title="Ziyaret Trendleri"
+          />
         </View>
 
-        {/* Aksiyon Butonları */}
+        {/* Hızlı İşlemler */}
         <View style={styles.actionsContainer}>
           <Text style={styles.sectionTitle}>Hızlı İşlemler</Text>
-          {actions.map((action, index) => (
+          {actions.map((action: any, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.actionButton}
+              style={[
+                styles.actionButton,
+                index === actions.length - 1 && styles.actionButtonLast,
+              ]}
               onPress={action.handler}
             >
               <View
                 style={[
                   styles.actionIcon,
-                  { backgroundColor: action.color + "20" },
+                  { backgroundColor: `${action.color}15` },
                 ]}
               >
-                <Ionicons
-                  name="accessibility-outline"
-                  size={20}
-                  color={action.color}
-                />
+                <Ionicons name={action.icon} size={22} color={action.color} />
               </View>
               <Text style={styles.actionText}>{action.label}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={20} color="#BDBDBD" />
             </TouchableOpacity>
           ))}
         </View>
@@ -146,7 +155,7 @@ const CustomerScreen = () => {
         style={styles.fab}
         onPress={() => console.log("→ Yeni müşteri ekle ekranına git")}
       >
-        <Ionicons name="add" size={28} color="#fff" />
+        <Ionicons name="add" size={32} color="#fff" />
       </TouchableOpacity>
     </SafeAreaView>
   );
