@@ -13,6 +13,7 @@ import { CustomerStatus } from "../../../types/enum/CustomerStatus";
 import HomeHeader from "../../../components/home/HomeHeader";
 import StatusUpdateModal from "../../../modals/customer/StatusUpdateModal";
 import YButton from "../../../components/common/YButton";
+import { TimePeriodType } from "../../../types/enum/TimePeriodType";
 
 const PAGE_SIZE = 5;
 const TIME_PERIOD = 3;
@@ -41,7 +42,7 @@ const HomeScreen = () => {
 
   const fetchSummary = useCallback(async () => {
     try {
-      const summary = await CustomerService.getSummary(TIME_PERIOD);
+      const summary = await CustomerService.getSummary(TimePeriodType.Daily);
       setCustomerCounts({
         byStatus: {
           [CustomerStatus.Delivered]: summary.Delivered ?? 0,
@@ -71,7 +72,7 @@ const HomeScreen = () => {
 
       try {
         const response = await CustomerService.getAll(
-          TIME_PERIOD,
+          TimePeriodType.Daily,
           pageNumber,
           PAGE_SIZE
         );
@@ -137,16 +138,41 @@ const HomeScreen = () => {
     setStatusModalVisible(true);
   }, []);
 
-  const handleStatusUpdate = (newStatus: CustomerStatus) => {
-    console.log(
-      "Yeni durum güncellenecek:",
-      selectedCustomerId,
-      "→",
-      newStatus
-    );
-    // API gönderimi burada yapılabilir.
-    setStatusModalVisible(false);
-    setSelectedCustomerId(null);
+  const handleStatusUpdate = async (newStatus: CustomerStatus) => {
+    if (!selectedCustomerId) return;
+
+    try {
+      const response = await CustomerService.updateStatu({
+        id: selectedCustomerId,
+        status: newStatus,
+      });
+
+      if (response.success) {
+        Alert.alert("Başarılı", response.message);
+
+        // Müşteri listesini lokal olarak güncelle
+        setCustomers((prevCustomers) => {
+          const updated = prevCustomers.map((customer) =>
+            customer.id === selectedCustomerId
+              ? { ...customer, status: newStatus }
+              : customer
+          );
+          setFilteredCustomers(applyFilter(updated, activeFilter));
+          return updated;
+        });
+
+        // Gerekirse özet verisini de yenile
+        fetchSummary();
+      } else {
+        Alert.alert("Hata", response.message);
+      }
+    } catch (error) {
+      console.error("Durum güncelleme hatası:", error);
+      Alert.alert("Hata", "Durum güncellenirken bir hata oluştu.");
+    } finally {
+      setStatusModalVisible(false);
+      setSelectedCustomerId(null);
+    }
   };
 
   const currentStatus = useMemo(() => {

@@ -3,6 +3,11 @@
 import apiClient from "../../utils/apiClient";
 import { PagedResponse } from "../../types/common/PagedResponse";
 import { Customer } from "../../types/customer/Customer";
+import {
+  CustomerUpdateStatusRequest,
+  CustomerUpdateStatusResponse,
+} from "../../types/customer/CustomerUpdateStatusRequest";
+import { TimePeriodType } from "../../types/enum/TimePeriodType";
 
 const BASE_URL = "/customers/";
 
@@ -39,11 +44,19 @@ export const CustomerService = {
   async update(updatedCustomer: Customer): Promise<void> {
     await apiClient.put(`${BASE_URL}/${updatedCustomer.id}`, updatedCustomer);
   },
-
+  async updateStatu(
+    request: CustomerUpdateStatusRequest
+  ): Promise<CustomerUpdateStatusResponse> {
+    const response = await apiClient.post(`${BASE_URL}${"update-statu"}`, {
+      id: request.id,
+      status: request.status,
+    });
+    return response.data;
+  },
   async delete(id: string): Promise<void> {
     await apiClient.delete(`${BASE_URL}/${id}`);
   },
-  getSummary: async (timePeriod = 3) => {
+  getSummary: async (timePeriod: TimePeriodType = TimePeriodType.Daily) => {
     const response = await apiClient.get(`/customers/summary`, {
       params: { timePeriod },
     });

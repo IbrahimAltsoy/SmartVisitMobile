@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,14 @@ import {
 import { styles } from "./Customer.styles";
 import { Ionicons } from "@expo/vector-icons";
 import YColumnChart from "../../../components/common/YColumnChart";
+import { CustomerService } from "../../../services/customer/CustomerService";
+import { TimePeriodType } from "../../../types/enum/TimePeriodType";
+
+const PeriodLabelToEnum: Record<string, TimePeriodType> = {
+  Haftalık: TimePeriodType.Weekly,
+  Aylık: TimePeriodType.Monthly,
+  Yıllık: TimePeriodType.Yearly,
+};
 
 const FILTER_OPTIONS = ["Haftalık", "Aylık", "Yıllık"];
 const { width } = Dimensions.get("window");
@@ -17,12 +25,12 @@ const { width } = Dimensions.get("window");
 const CustomerScreen = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("Haftalık");
 
-  const stats = [
-    { label: "Toplam", value: 124, icon: "people", color: "#6750A4" },
-    { label: "Yeni", value: 37, icon: "person-add", color: "#4CAF50" },
-    { label: "Teslim", value: 60, icon: "checkmark-done", color: "#FFC107" },
-    { label: "İptal", value: 6, icon: "close", color: "#F44336" },
-  ];
+  const [stats, setStats] = useState([
+    { label: "Toplam", value: 0, icon: "people", color: "#6750A4" },
+    { label: "Yeni", value: 0, icon: "person-add", color: "#4CAF50" },
+    { label: "Teslim", value: 0, icon: "checkmark-done", color: "#FFC107" },
+    { label: "İptal", value: 0, icon: "close", color: "#F44336" },
+  ]);
 
   const actions = [
     {
@@ -55,12 +63,54 @@ const CustomerScreen = () => {
     { label: "Paz", value: 6, color: "#1976D2" },
   ];
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const timePeriod = PeriodLabelToEnum[selectedPeriod];
+        const summary = await CustomerService.getSummary(timePeriod);
+
+        setStats([
+          {
+            label: "Toplam",
+            value:
+              (summary.Delivered ?? 0) +
+              (summary.Waiting ?? 0) +
+              (summary.Canceled ?? 0),
+            icon: "people",
+            color: "#6750A4",
+          },
+          {
+            label: "Yeni",
+            value: summary.Waiting ?? 0,
+            icon: "person-add",
+            color: "#4CAF50",
+          },
+          {
+            label: "Teslim",
+            value: summary.Delivered ?? 0,
+            icon: "checkmark-done",
+            color: "#FFC107",
+          },
+          {
+            label: "İptal",
+            value: summary.Canceled ?? 0,
+            icon: "close",
+            color: "#F44336",
+          },
+        ]);
+      } catch (error) {
+        console.error("Özet veriler alınamadı", error);
+      }
+    };
+
+    fetchStats();
+  }, [selectedPeriod]);
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Başlık */}
       <View style={styles.header}>
         <Text style={styles.title}>Müşteri Yönetimi</Text>
-        {/* İstenirse buraya bir ikon eklenebilir */}
       </View>
 
       {/* Dönem Seçici */}
